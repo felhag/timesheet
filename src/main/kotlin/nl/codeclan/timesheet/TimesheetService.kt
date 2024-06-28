@@ -16,7 +16,7 @@ private val CLANDAY = LocalDate.of(2024, Month.JANUARY, 12)
 private val HOLIDAY_MANAGER = HolidayManager.getInstance(ManagerParameters.create(Locale.of("nl")))
 
 @Service
-class TimesheetService {
+class TimesheetService(val calendarService: GoogleCalendarService) {
 
     fun generate(): Timesheet {
         val month = determineMonth()
@@ -28,18 +28,21 @@ class TimesheetService {
         var from = month.atDay(1)
         val until = month.atEndOfMonth()
         val types = ArrayList<DayType>()
+        val vacation = calendarService.getEvents(month)
         while (from <= until) {
-            types.add(determineType(from))
+            types.add(determineType(from, vacation))
             from = from.plusDays(1)
         }
         return types
     }
 
-    private fun determineType(day: LocalDate): DayType {
+    private fun determineType(day: LocalDate, vacation: Set<LocalDate>): DayType {
         return if (day.dayOfWeek == DayOfWeek.SATURDAY || day.dayOfWeek == DayOfWeek.SUNDAY) {
             DayType.WEEKEND
         } else if (HOLIDAY_MANAGER.isHoliday(day)) {
             DayType.HOLIDAY
+        } else if (vacation.contains(day)) {
+            DayType.LEAVE
         } else if (isClanday(day)) {
             DayType.CLANDAY
         } else {

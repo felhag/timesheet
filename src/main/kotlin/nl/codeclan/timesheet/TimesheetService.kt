@@ -19,7 +19,10 @@ private val HOLIDAY_MANAGER = HolidayManager.getInstance(ManagerParameters.creat
 class TimesheetService(val calendarService: GoogleCalendarService) {
 
     fun generate(): Timesheet {
-        val month = determineMonth()
+        return generate(determineMonth())
+    }
+
+    fun generate(month: YearMonth): Timesheet {
         val types = determineTypes(month)
         return Timesheet(month, types)
     }

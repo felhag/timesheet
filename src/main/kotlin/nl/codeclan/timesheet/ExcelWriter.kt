@@ -21,23 +21,13 @@ class ExcelWriter {
         sheet.createRow(0).createCell(0).setCellValue(timesheet.getMonthDisplay())
         dateRow(workbook, sheet, timesheet)
 
-        createRow(workbook, sheet, timesheet, 4, "Ziekte", DayType.SICK)
         createRow(workbook, sheet, timesheet, 3, "Klant uren", DayType.WORK)
+        createRow(workbook, sheet, timesheet, 4, "Ziekte", DayType.SICK)
         createRow(workbook, sheet, timesheet, 5, "Verlof", DayType.LEAVE)
         createRow(workbook, sheet, timesheet, 6, "Feestdagen", DayType.HOLIDAY)
         createRow(workbook, sheet, timesheet, 7, "Clandays", DayType.CLANDAY)
 
-        val total: Row = sheet.createRow(9)
-        val totalLabel = total.createCell(0)
-        totalLabel.setCellValue("Totaal aantal uren")
-        totalLabel.cellStyle = boldStyle(workbook)
-
-        timesheet.types.forEachIndexed { i, type ->
-            val column = i + 1
-            val cell = total.createCell(column)
-            cell.cellFormula = sumFormula(column, 4, column, 8)
-            cell.cellStyle = style(workbook, if (type == DayType.WEEKEND || type == DayType.HOLIDAY) IndexedColors.SKY_BLUE else IndexedColors.WHITE)
-        }
+        totalRow(workbook, sheet, timesheet)
 
         workbook.write(FileOutputStream("C:\\tmp\\temp.xlsx"))
         workbook.close()
@@ -48,7 +38,7 @@ class ExcelWriter {
         timesheet.types.forEachIndexed { i, type ->
             val cell = dates.createCell(i + 1)
             cell.setCellValue("${i + 1}")
-            cell.cellStyle = style(workbook, if (type == DayType.WEEKEND || type == DayType.HOLIDAY) IndexedColors.SKY_BLUE else IndexedColors.WHITE)
+            cell.cellStyle = style(workbook, if (type == DayType.WEEKEND || type == DayType.HOLIDAY) IndexedColors.GREY_25_PERCENT else IndexedColors.WHITE)
         }
     }
 
@@ -61,8 +51,15 @@ class ExcelWriter {
     private fun addIfType(workbook: Workbook, row: Row, types: List<DayType>, target: DayType, index: Int) {
         types.forEachIndexed{ i, type ->
             run {
+                val cell = row.createCell(i + 1)
+                val style = workbook.createCellStyle()
+                cell.cellStyle = style
                 if (type == target) {
-                    row.createCell(i + 1).setCellValue(8.0)
+                    cell.setCellValue(8.0)
+                    style.alignment = HorizontalAlignment.CENTER
+                }
+                if (type == DayType.WEEKEND || type == DayType.HOLIDAY) {
+                    style.fillForegroundColor = IndexedColors.GREY_25_PERCENT.index
                 }
             }
         }
@@ -72,13 +69,37 @@ class ExcelWriter {
         total.cellStyle = style(workbook, IndexedColors.WHITE)
     }
 
+    private fun totalRow(workbook: Workbook, sheet: Sheet, timesheet: Timesheet) {
+        val total: Row = sheet.createRow(8)
+        val totalLabel = total.createCell(0)
+        totalLabel.setCellValue("Totaal aantal uren")
+        totalLabel.cellStyle = boldStyle(workbook)
+
+        timesheet.types.forEachIndexed { i, type ->
+            val column = i + 1
+            val cell = total.createCell(column)
+            val holiday = type == DayType.WEEKEND || type == DayType.HOLIDAY
+            if (!holiday) {
+                cell.cellFormula = sumFormula(column, 4, column, 8)
+            }
+            cell.cellStyle = style(workbook, if (holiday) IndexedColors.GREY_25_PERCENT else IndexedColors.WHITE)
+        }
+
+        val colIndex = timesheet.types.size + 1
+        val sum = total.createCell(colIndex)
+        sum.cellFormula = sumFormula(colIndex, 4, colIndex, 8)
+        sum.cellStyle = style(workbook, IndexedColors.LIME)
+
+    }
+
     private fun style(workbook: Workbook, color: IndexedColors): CellStyle {
         val headerStyle = boldStyle(workbook)
-        headerStyle.fillForegroundColor = color.getIndex()
+        headerStyle.fillForegroundColor = color.index
         headerStyle.borderBottom = BorderStyle.THIN
         headerStyle.borderTop = BorderStyle.THIN
         headerStyle.borderRight = BorderStyle.THIN
         headerStyle.borderLeft = BorderStyle.THIN
+        headerStyle.alignment = HorizontalAlignment.CENTER
         return headerStyle
     }
 
@@ -86,7 +107,7 @@ class ExcelWriter {
         val font = workbook.createFont()
         font.bold = true
 
-        val headerStyle: CellStyle = workbook.createCellStyle()
+        val headerStyle = workbook.createCellStyle()
         headerStyle.setFont(font)
         return headerStyle
     }

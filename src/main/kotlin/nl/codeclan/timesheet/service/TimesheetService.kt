@@ -1,4 +1,4 @@
-package nl.codeclan.timesheet
+package nl.codeclan.timesheet.service
 
 import de.focus_shift.jollyday.core.HolidayManager
 import de.focus_shift.jollyday.core.ManagerParameters

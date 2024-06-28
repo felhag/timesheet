@@ -1,4 +1,4 @@
-package nl.codeclan.timesheet
+package nl.codeclan.timesheet.service
 
 import nl.codeclan.timesheet.model.DayType
 import nl.codeclan.timesheet.model.Timesheet

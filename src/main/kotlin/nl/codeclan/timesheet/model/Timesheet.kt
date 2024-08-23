@@ -4,7 +4,7 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.*
 
-class Timesheet(private val month: YearMonth, val days: List<Day>) {
+class Timesheet(val month: YearMonth, val days: List<Day>) {
 
     override fun toString(): String {
         var result = getMonthDisplay()
@@ -12,6 +12,6 @@ class Timesheet(private val month: YearMonth, val days: List<Day>) {
         return result
     }
 
-    fun getMonthDisplay() = "${month.year} ${month.month.getDisplayName(TextStyle.FULL, Locale.getDefault())}"
+    fun getMonthDisplay() = "${month.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${month.year}"
     fun forEachColumn(fnc: (int: Int) -> Unit) = days.forEachIndexed { i, _ -> fnc(i + 1)}
 }

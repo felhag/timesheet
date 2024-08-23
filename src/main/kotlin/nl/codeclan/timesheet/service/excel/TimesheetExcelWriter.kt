@@ -1,21 +1,20 @@
-package nl.codeclan.timesheet.service
+package nl.codeclan.timesheet.service.excel
 
 import nl.codeclan.timesheet.model.Day
 import nl.codeclan.timesheet.model.DayType
 import nl.codeclan.timesheet.model.Timesheet
 import org.apache.poi.ss.usermodel.*
-import org.apache.poi.ss.util.CellReference.convertNumToColString
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.stereotype.Service
-import java.io.FileOutputStream
 
 
 @Service
-class ExcelWriter {
+class TimesheetExcelWriter: AbstractExcelWriter() {
 
-    fun write(timesheet: Timesheet) {
-        val workbook = XSSFWorkbook()
-        val sheet = workbook.createSheet("Timesheet")
+    override fun name(): String {
+        return "Timesheet"
+    }
+
+    override fun write(workbook: Workbook, sheet: Sheet, timesheet: Timesheet) {
         sheet.setColumnWidth(0, 6000)
         timesheet.forEachColumn { i -> sheet.setColumnWidth(i, 1200) }
 
@@ -29,9 +28,6 @@ class ExcelWriter {
         createRow(workbook, sheet, timesheet, 7, "Clandays", DayType.CLANDAY)
 
         totalRow(workbook, sheet, timesheet)
-
-        workbook.write(FileOutputStream("C:\\tmp\\temp.xlsx"))
-        workbook.close()
     }
 
     private fun dateRow(workbook: Workbook,  sheet: Sheet, timesheet: Timesheet) {
@@ -103,18 +99,5 @@ class ExcelWriter {
         headerStyle.borderLeft = BorderStyle.THIN
         headerStyle.alignment = HorizontalAlignment.CENTER
         return headerStyle
-    }
-
-    private fun boldStyle(workbook: Workbook): CellStyle {
-        val font = workbook.createFont()
-        font.bold = true
-
-        val headerStyle = workbook.createCellStyle()
-        headerStyle.setFont(font)
-        return headerStyle
-    }
-
-    private fun sumFormula(colStart: Int, rowStart: Int, colEnd: Int, rowEnd: Int): String {
-        return "SUM(${convertNumToColString(colStart)}${rowStart}:${convertNumToColString(colEnd)}${rowEnd})"
     }
 }

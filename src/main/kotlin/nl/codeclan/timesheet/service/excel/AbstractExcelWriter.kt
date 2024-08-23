@@ -10,7 +10,7 @@ import java.io.File
 import java.io.FileOutputStream
 
 abstract class AbstractExcelWriter {
-    abstract fun write(workbook: Workbook, sheet: Sheet, obj: Timesheet)
+    abstract fun write(workbook: Workbook, sheet: Sheet, timesheet: Timesheet)
     abstract fun name(): String
 
     fun write(timesheet: Timesheet): File {

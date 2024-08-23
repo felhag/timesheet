@@ -19,11 +19,6 @@ private val HOLIDAY_MANAGER = HolidayManager.getInstance(ManagerParameters.creat
 
 @Service
 class TimesheetService(val calendarService: GoogleCalendarService) {
-
-    fun generate(): Timesheet {
-        return generate(determineMonth())
-    }
-
     fun generate(month: YearMonth): Timesheet {
         val types = determineTypes(month)
         return Timesheet(month, types)
@@ -74,13 +69,5 @@ class TimesheetService(val calendarService: GoogleCalendarService) {
             }
             else -> null
         }
-    }
-
-    private fun determineMonth(): YearMonth {
-        var now = LocalDate.now()
-        if (now.dayOfMonth < 15) {
-            now = now.minusMonths(1)
-        }
-        return YearMonth.from(now)
     }
 }

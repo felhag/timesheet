@@ -26,7 +26,7 @@ class ReiskostenExcelWriter : AbstractExcelWriter() {
                 if (day.location != null && day.location != Location.HOME) {
                     rowIdx++
                     val row = sheet.createRow(rowIdx)
-                    val date = LocalDate.of(timesheet.month.year, timesheet.month.month, i + 1)
+                    val date = timesheet.getDay(i + 1)
                     createRow(row, rowIdx + 1, date, day, workbook)
                 }
             }

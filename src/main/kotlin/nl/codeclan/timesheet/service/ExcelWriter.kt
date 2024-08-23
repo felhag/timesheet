@@ -1,5 +1,6 @@
 package nl.codeclan.timesheet.service
 
+import nl.codeclan.timesheet.model.Day
 import nl.codeclan.timesheet.model.DayType
 import nl.codeclan.timesheet.model.Timesheet
 import org.apache.poi.ss.usermodel.*
@@ -35,7 +36,8 @@ class ExcelWriter {
 
     private fun dateRow(workbook: Workbook,  sheet: Sheet, timesheet: Timesheet) {
         val dates = sheet.createRow(2)
-        timesheet.types.forEachIndexed { i, type ->
+        timesheet.days.forEachIndexed { i, day ->
+            val type = day.type
             val cell = dates.createCell(i + 1)
             cell.setCellValue("${i + 1}")
             cell.cellStyle = style(workbook, if (type == DayType.WEEKEND || type == DayType.HOLIDAY) IndexedColors.GREY_25_PERCENT else IndexedColors.WHITE)
@@ -45,20 +47,20 @@ class ExcelWriter {
     private fun createRow(workbook: Workbook, sheet: Sheet, timesheet: Timesheet, index: Int, label: String, type: DayType) {
         val row = sheet.createRow(index)
         row.createCell(0).setCellValue(label)
-        addIfType(workbook, row, timesheet.types, type, index)
+        addIfType(workbook, row, timesheet.days, type, index)
     }
 
-    private fun addIfType(workbook: Workbook, row: Row, types: List<DayType>, target: DayType, index: Int) {
-        types.forEachIndexed{ i, type ->
+    private fun addIfType(workbook: Workbook, row: Row, types: List<Day>, target: DayType, index: Int) {
+        types.forEachIndexed{ i, day ->
             run {
                 val cell = row.createCell(i + 1)
                 val style = workbook.createCellStyle()
                 cell.cellStyle = style
-                if (type == target) {
+                if (day.type == target) {
                     cell.setCellValue(8.0)
                     style.alignment = HorizontalAlignment.CENTER
                 }
-                if (type == DayType.WEEKEND || type == DayType.HOLIDAY) {
+                if (day.type == DayType.WEEKEND || day.type == DayType.HOLIDAY) {
                     style.fillForegroundColor = IndexedColors.GREY_25_PERCENT.index
                 }
             }
@@ -75,17 +77,17 @@ class ExcelWriter {
         totalLabel.setCellValue("Totaal aantal uren")
         totalLabel.cellStyle = boldStyle(workbook)
 
-        timesheet.types.forEachIndexed { i, type ->
+        timesheet.days.forEachIndexed { i, day ->
             val column = i + 1
             val cell = total.createCell(column)
-            val holiday = type == DayType.WEEKEND || type == DayType.HOLIDAY
+            val holiday = day.type == DayType.WEEKEND || day.type == DayType.HOLIDAY
             if (!holiday) {
                 cell.cellFormula = sumFormula(column, 4, column, 8)
             }
             cell.cellStyle = style(workbook, if (holiday) IndexedColors.GREY_25_PERCENT else IndexedColors.WHITE)
         }
 
-        val colIndex = timesheet.types.size + 1
+        val colIndex = timesheet.days.size + 1
         val sum = total.createCell(colIndex)
         sum.cellFormula = sumFormula(colIndex, 4, colIndex, 8)
         sum.cellStyle = style(workbook, IndexedColors.LIME)

@@ -34,12 +34,13 @@ class ReiskostenExcelWriter : AbstractExcelWriter() {
         val headerStyle = workbook.createCellStyle()
         headerStyle.borderTop = BorderStyle.THIN
 
-        val total = sheet.createRow(rowIdx++)
+        rowIdx++
+        val total = sheet.createRow(rowIdx)
         IntRange(0, 3).forEach { i -> createTotalCell(total, i, workbook) }
         total.getCell(0).setCellValue("Totaal")
-        total.getCell(2).cellFormula = sumFormula(2, 4, 2, rowIdx - 1)
+        total.getCell(2).cellFormula = sumFormula(2, 4, 2, rowIdx)
         total.getCell(2).cellStyle.dataFormat = workbook.creationHelper.createDataFormat().getFormat("# k\\m")
-        total.getCell(3).cellFormula = sumFormula(3, 4, 3, rowIdx - 1)
+        total.getCell(3).cellFormula = sumFormula(3, 4, 3, rowIdx)
         total.getCell(3).cellStyle.dataFormat = workbook.creationHelper.createDataFormat().getFormat("\\€ #,##0.00")
     }
 

@@ -25,11 +25,6 @@ class TimesheetController(
     private val timesheetWriter: TimesheetExcelWriter,
 ) {
 
-    @GetMapping("/locations")
-    fun locations(): Map<String, LocationDto> {
-        return Location.entries.associate { loc -> Pair(loc.name, LocationDto(loc.title, loc.icon, loc.km)) }
-    }
-
     @GetMapping("/timesheet", "timesheet/{monthYear}")
     fun generate(@PathVariable(required = false) @DateTimeFormat(pattern = "M-yyyy") monthYear: Optional<YearMonth>): Timesheet {
         return monthYear.orElseGet(this::determineMonth).let(timesheetService::generate)

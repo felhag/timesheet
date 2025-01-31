@@ -3,8 +3,10 @@ package nl.codeclan.timesheet.service
 import de.focus_shift.jollyday.core.HolidayManager
 import de.focus_shift.jollyday.core.ManagerParameters
 import nl.codeclan.timesheet.model.Day
+import nl.codeclan.timesheet.repository.findByMonth
 import nl.codeclan.timesheet.model.DayType
 import nl.codeclan.timesheet.model.Timesheet
+import nl.codeclan.timesheet.repository.DayRepository
 import org.springframework.stereotype.Service
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -17,22 +19,23 @@ private val CLANDAY = LocalDate.of(2024, Month.JANUARY, 12)
 private val HOLIDAY_MANAGER = HolidayManager.getInstance(ManagerParameters.create(Locale.of("nl")))
 
 @Service
-class TimesheetService(val calendarService: GoogleCalendarService) {
+class TimesheetService(val dayRepository: DayRepository) {
     fun generate(month: YearMonth): Timesheet {
         val types = determineTypes(month)
         return Timesheet(month, types)
     }
 
     private fun determineTypes(month: YearMonth): ArrayList<Day> {
+        val persisted = dayRepository.findByMonth(month)
         var from = month.atDay(1)
         val until = month.atEndOfMonth()
         val days = ArrayList<Day>()
         val vacation = emptySet<LocalDate>()
-//        val vacation = calendarService.getEvents(month)
         while (from <= until) {
-            val type = determineType(from, vacation)
-            val location = null //determineLocation(from, type)
-            days.add(Day(type, location))
+            //determineLocation(from, type)
+            days.add(persisted[from]
+                ?.let { Day(it.type!!, it.location?.id) }
+                ?: Day(determineType(from, vacation), null))
             from = from.plusDays(1)
         }
         return days

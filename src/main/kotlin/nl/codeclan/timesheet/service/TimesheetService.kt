@@ -4,7 +4,6 @@ import de.focus_shift.jollyday.core.HolidayManager
 import de.focus_shift.jollyday.core.ManagerParameters
 import nl.codeclan.timesheet.model.Day
 import nl.codeclan.timesheet.model.DayType
-import nl.codeclan.timesheet.model.Location
 import nl.codeclan.timesheet.model.Timesheet
 import org.springframework.stereotype.Service
 import java.time.DayOfWeek
@@ -32,7 +31,7 @@ class TimesheetService(val calendarService: GoogleCalendarService) {
 //        val vacation = calendarService.getEvents(month)
         while (from <= until) {
             val type = determineType(from, vacation)
-            val location = determineLocation(from, type)
+            val location = null //determineLocation(from, type)
             days.add(Day(type, location))
             from = from.plusDays(1)
         }
@@ -57,17 +56,18 @@ class TimesheetService(val calendarService: GoogleCalendarService) {
         return day.dayOfWeek == DayOfWeek.FRIDAY && ChronoUnit.WEEKS.between(CLANDAY, day) % 2 == 0L
     }
 
-    private fun determineLocation(day: LocalDate, type: DayType): Location? {
-        return when(type) {
-            DayType.WORK, DayType.CLANDAY -> {
-                return when (day.dayOfWeek) {
-                    DayOfWeek.TUESDAY -> Location.DUIVEN
-                    DayOfWeek.WEDNESDAY -> Location.ARNHEM
-                    DayOfWeek.FRIDAY -> Location.DENBOSCH
-                    else -> Location.HOME
-                }
-            }
-            else -> null
-        }
-    }
+// TODO: Default day for location
+//    private fun determineLocation(day: LocalDate, type: DayType): Location? {
+//        return when(type) {
+//            DayType.WORK, DayType.CLANDAY -> {
+//                return when (day.dayOfWeek) {
+//                    DayOfWeek.TUESDAY -> Location.DUIVEN
+//                    DayOfWeek.WEDNESDAY -> Location.ARNHEM
+//                    DayOfWeek.FRIDAY -> Location.DENBOSCH
+//                    else -> Location.HOME
+//                }
+//            }
+//            else -> null
+//        }
+//    }
 }

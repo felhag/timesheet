@@ -1,21 +1,23 @@
 package nl.codeclan.timesheet.service.excel
 
+import nl.codeclan.timesheet.entities.Location
 import nl.codeclan.timesheet.model.Day
-import nl.codeclan.timesheet.model.Location
 import nl.codeclan.timesheet.model.Timesheet
+import nl.codeclan.timesheet.repository.LocationRepository
 import org.apache.poi.ss.usermodel.*
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 
 @Service
-class ReiskostenExcelWriter : AbstractExcelWriter() {
+class ReiskostenExcelWriter(val locationRepository: LocationRepository) : AbstractExcelWriter() {
 
     override fun name(): String {
         return "Reiskosten"
     }
 
     override fun write(workbook: Workbook, sheet: Sheet, timesheet: Timesheet) {
+        val locations = locationRepository.findAll().associateBy { it.id!! }
         IntRange(0, 3).forEach{ i -> sheet.setColumnWidth(i, 4000) }
 
         sheet.createRow(0).createCell(0).setCellValue(timesheet.getMonthDisplay())
@@ -23,11 +25,11 @@ class ReiskostenExcelWriter : AbstractExcelWriter() {
         var rowIdx = 2
         timesheet.days
             .forEachIndexed { i, day ->
-                if (day.location != null && day.location != Location.HOME) {
+                if (locations[day.location]?.name != Location.HOME) {
                     rowIdx++
                     val row = sheet.createRow(rowIdx)
-                    val date = timesheet.getDay(i + 1)
-                    createRow(row, rowIdx + 1, date, day, workbook)
+                    val date = timesheet.getDay(i)
+                    createRow(row, rowIdx + 1, date, day, workbook, locations)
                 }
             }
 
@@ -63,18 +65,26 @@ class ReiskostenExcelWriter : AbstractExcelWriter() {
         cell.setCellValue(value)
     }
 
-    private fun createRow(row: Row, rowIdx: Int, date: LocalDate, day: Day, workbook: Workbook) {
+    private fun createRow(
+        row: Row,
+        rowIdx: Int,
+        date: LocalDate,
+        day: Day,
+        workbook: Workbook,
+        locations: Map<Long, Location>
+    ) {
+        val location = locations[day.location]!!
         val dateCell = row.createCell(0)
         dateCell.cellStyle = formatStyle(workbook, "dd-mm-yyyy")
         dateCell.cellStyle.alignment = HorizontalAlignment.LEFT
         dateCell.setCellValue(date)
 
         val locCell = row.createCell(1)
-        locCell.setCellValue(day.location!!.title)
+        locCell.setCellValue(location.name)
 
         val kmCell = row.createCell(2, CellType.NUMERIC)
         kmCell.cellStyle = formatStyle(workbook, "# k\\m")
-        kmCell.setCellValue(day.location.km.toDouble())
+        kmCell.setCellValue(location.distance.toDouble())
 
         val costsCell = row.createCell(3)
         costsCell.cellFormula = "C${rowIdx}*0.23"

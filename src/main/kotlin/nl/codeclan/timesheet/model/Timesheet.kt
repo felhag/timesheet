@@ -18,6 +18,5 @@ class Timesheet(@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "M-yyyy")
     fun getMonthDisplay() = "${month.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${month.year}"
     fun getMonth(): String? = month.format(DateTimeFormatter.ofPattern("MM-yyyy"))
     fun forEachColumn(fnc: (int: Int) -> Unit) = days.forEachIndexed { i, _ -> fnc(i + 1)}
-    fun getDay(i: Int) = LocalDate.of(month.year, month.month, i)
-
+    fun getDay(i: Int) = LocalDate.of(month.year, month.month, i + 1)
 }

@@ -1,53 +1,33 @@
 package nl.codeclan.timesheet.controller
 
-import nl.codeclan.timesheet.model.Location
-import nl.codeclan.timesheet.model.LocationDto
+import nl.codeclan.timesheet.entities.TimesheetDay
 import nl.codeclan.timesheet.model.Timesheet
+import nl.codeclan.timesheet.repository.DayRepository
+import nl.codeclan.timesheet.repository.LocationRepository
 import nl.codeclan.timesheet.service.TimesheetService
-import nl.codeclan.timesheet.service.excel.AbstractExcelWriter
-import nl.codeclan.timesheet.service.excel.ReiskostenExcelWriter
-import nl.codeclan.timesheet.service.excel.TimesheetExcelWriter
-import org.springframework.core.io.InputStreamResource
 import org.springframework.format.annotation.DateTimeFormat
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.io.FileInputStream
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.*
 
-
 @RestController
+@RequestMapping("/timesheet")
 class TimesheetController(
     private val timesheetService: TimesheetService,
-    private val reiskostenWriter: ReiskostenExcelWriter,
-    private val timesheetWriter: TimesheetExcelWriter,
+    private val dayRepository: DayRepository,
+    private val locationRepository: LocationRepository
 ) {
-
-    @GetMapping("/timesheet", "timesheet/{monthYear}")
+    @GetMapping("", "/{monthYear}")
     fun generate(@PathVariable(required = false) @DateTimeFormat(pattern = "M-yyyy") monthYear: Optional<YearMonth>): Timesheet {
         return monthYear.orElseGet(this::determineMonth).let(timesheetService::generate)
     }
 
-    @PostMapping("/reiskosten")
-    fun reiskosten(@RequestBody timesheet: Timesheet): ResponseEntity<InputStreamResource> {
-        return writeExcel(reiskostenWriter, timesheet)
-    }
-
-    @PostMapping("/timesheet")
-    fun timesheet(@RequestBody timesheet: Timesheet): ResponseEntity<InputStreamResource> {
-        return writeExcel(timesheetWriter, timesheet)
-    }
-
-    private fun writeExcel(writer: AbstractExcelWriter, timesheet: Timesheet): ResponseEntity<InputStreamResource> {
-        val file = writer.write(timesheet)
-        val resource = InputStreamResource(FileInputStream(file))
-
-        return ResponseEntity.ok()
-            .contentLength(file.length())
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .body(resource)
+    @PostMapping
+    fun timesheet(@RequestBody timesheet: Timesheet) {
+        dayRepository.saveAll(timesheet.days.mapIndexed { idx, day ->
+            TimesheetDay(id = null, timesheet.getDay(idx), day.type, day.location?.let{ locationRepository.findById(it).get()})
+        })
     }
 
     private fun determineMonth(): YearMonth {

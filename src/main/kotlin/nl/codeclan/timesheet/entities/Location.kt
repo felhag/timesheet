@@ -1,16 +1,14 @@
 package nl.codeclan.timesheet.entities
 
 import jakarta.persistence.*
-import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
 
 @Entity
 class Location(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Int? = null,
+    var id: Long? = null,
 
     @field:NotBlank
     @Column(nullable = false)
@@ -25,4 +23,8 @@ class Location(
     @field:Min(1)
     @Column(nullable = false)
     var distance: Int = 0,
-)
+) {
+    companion object {
+        const val HOME = "Thuis"
+    }
+}

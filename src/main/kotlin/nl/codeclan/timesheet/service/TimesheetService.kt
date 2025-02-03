@@ -15,7 +15,7 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import java.util.*
 
-private val CLANDAY = LocalDate.of(2024, Month.JANUARY, 12)
+private val CLANDAY = LocalDate.of(2024, Month.JANUARY, 5)
 private val HOLIDAY_MANAGER = HolidayManager.getInstance(ManagerParameters.create(Locale.of("nl")))
 
 @Service

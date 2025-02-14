@@ -157,7 +157,7 @@
 						</platforms>
 					</from>
 					<to>
-						<image>ghcr.io/sanderdona/timesheet:latest</image>
+						<image>ghcr.io/felhag/timesheet:latest</image>
 					</to>
 					<containerizingMode>packaged</containerizingMode>
 					<container>

@@ -1,0 +1,23 @@
+name: Build and Push to GHCR
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build and push Docker image
+        run: mvn compile jib:build -Dimage=ghcr.io/${{ github.repository }}/timesheet:latest

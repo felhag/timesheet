@@ -12,9 +12,7 @@ import java.time.LocalDate
 @Service
 class ReiskostenExcelWriter(val locationRepository: LocationRepository) : AbstractExcelWriter() {
 
-    override fun name(): String {
-        return "Reiskosten"
-    }
+    override fun name(): String = "Reiskosten"
 
     override fun write(workbook: Workbook, sheet: Sheet, timesheet: Timesheet) {
         val locations = locationRepository.findAll().associateBy { it.id!! }
@@ -92,8 +90,8 @@ class ReiskostenExcelWriter(val locationRepository: LocationRepository) : Abstra
     }
 
     private fun formatStyle(workbook: Workbook, format: String): CellStyle? {
-        val cellStyle3 = workbook.createCellStyle()
-        cellStyle3.dataFormat = workbook.creationHelper.createDataFormat().getFormat(format)
-        return cellStyle3
+        val cellStyle = workbook.createCellStyle()
+        cellStyle.dataFormat = workbook.creationHelper.createDataFormat().getFormat(format)
+        return cellStyle
     }
 }

@@ -1,5 +1,7 @@
 package nl.codeclan.timesheet.controller
 
+import nl.codeclan.timesheet.model.UserDto
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -10,15 +12,17 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class AuthController {
+class AuthController(@Value("\${codeclan.base-url}") private val url: String) {
     @GetMapping("/auth")
-    fun auth(@AuthenticationPrincipal oAuth2User: OAuth2User, @RequestParam(value = "continue", required = false) cont: String?): ResponseEntity<String> {
+    fun auth(@AuthenticationPrincipal oAuth2User: OAuth2User, @RequestParam(value = "continue", required = false) cont: String?): ResponseEntity<UserDto> {
         if (cont != null) {
             val headers = LinkedMultiValueMap<String, String>()
-            headers.add("Location", "http://localhost:3000")
+            headers.add("Location", url)
             return ResponseEntity(headers, HttpStatus.FOUND)
         } else {
-            return ResponseEntity.noContent().build()
+            val attrs = oAuth2User.attributes;
+            val user = UserDto(attrs["name"].toString(), attrs["email"].toString())
+            return ResponseEntity.ok(user)
         }
     }
 }

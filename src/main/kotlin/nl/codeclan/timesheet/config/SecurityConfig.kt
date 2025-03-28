@@ -1,5 +1,6 @@
 package nl.codeclan.timesheet.config
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.Customizer.withDefaults
@@ -10,11 +11,13 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.web.SecurityFilterChain
 
 @Configuration
-class SecurityConfig(private val clientRegistrationRepository: ClientRegistrationRepository) {
+class SecurityConfig(private val clientRegistrationRepository: ClientRegistrationRepository,
+                     @Value("\${codeclan.base-url}") private val url: String) {
 
     @Bean
     fun oauth2SecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http.authorizeHttpRequests { it.anyRequest().authenticated() }
+        http.csrf { it.disable() }
+            .authorizeHttpRequests { it.anyRequest().authenticated() }
             .oauth2Login {
                 it.authorizationEndpoint { endpoint ->
                     endpoint.authorizationRequestResolver(
@@ -22,6 +25,7 @@ class SecurityConfig(private val clientRegistrationRepository: ClientRegistratio
                     )
                 }
             }
+            .logout { it.logoutSuccessUrl(url) }
             .oauth2Client(withDefaults())
 
         return http.build()

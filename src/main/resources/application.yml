@@ -13,11 +13,6 @@ spring:
         registration:
           google:
             client-id: 378512219962-9jussfae27k7d9epnpaodh3t890p5l72.apps.googleusercontent.com
-            client-secret:
 server:
   servlet:
     context-path: /api
-
-logging:
-  level:
-    org.springframework.security: TRACE

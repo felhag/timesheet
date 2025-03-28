@@ -10,19 +10,30 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
 class AuthController(@Value("\${codeclan.base-url}") private val url: String) {
-    @GetMapping("/auth")
+
+    @GetMapping("/user")
+    fun user(@AuthenticationPrincipal oAuth2User: OAuth2User?): ResponseEntity<UserDto> {
+        if (oAuth2User == null) {
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        } else {
+            val attrs = oAuth2User.attributes
+            val user = UserDto(attrs["name"].toString(), attrs["email"].toString())
+            return ResponseEntity.ok(user)
+        }
+    }
+
+    @GetMapping("/login")
     fun auth(@AuthenticationPrincipal oAuth2User: OAuth2User, @RequestParam(value = "continue", required = false) cont: String?): ResponseEntity<UserDto> {
         if (cont != null) {
             val headers = LinkedMultiValueMap<String, String>()
             headers.add("Location", url)
             return ResponseEntity(headers, HttpStatus.FOUND)
         } else {
-            val attrs = oAuth2User.attributes;
-            val user = UserDto(attrs["name"].toString(), attrs["email"].toString())
-            return ResponseEntity.ok(user)
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST)
         }
     }
 }

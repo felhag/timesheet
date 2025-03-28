@@ -17,9 +17,9 @@ class SecurityConfig(private val clientRegistrationRepository: ClientRegistratio
     @Bean
     fun oauth2SecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http.csrf { it.disable() }
-            .authorizeHttpRequests { it.requestMatchers("/actuator/**").permitAll().anyRequest().authenticated() }
+            .authorizeHttpRequests { it.requestMatchers("/actuator/**", "/user").permitAll().anyRequest().authenticated() }
             .oauth2Login {
-                it.authorizationEndpoint { endpoint ->
+                it.loginPage("$url/api/oauth2/authorization/google").authorizationEndpoint { endpoint ->
                     endpoint.authorizationRequestResolver(
                         DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, DEFAULT_AUTHORIZATION_REQUEST_BASE_URI)
                     )

@@ -16,6 +16,9 @@ class Location(
     @Column(nullable = false)
     var name: String = "",
 
+    @ManyToOne
+    var employee: Employee,
+
     @Column(nullable = false)
     var lat: Double = 0.0,
 

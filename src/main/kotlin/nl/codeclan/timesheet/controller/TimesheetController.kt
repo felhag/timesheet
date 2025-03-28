@@ -1,11 +1,13 @@
 package nl.codeclan.timesheet.controller
 
+import nl.codeclan.timesheet.entities.Employee
 import nl.codeclan.timesheet.entities.TimesheetDay
 import nl.codeclan.timesheet.model.DayType
 import nl.codeclan.timesheet.model.Timesheet
 import nl.codeclan.timesheet.repository.DayRepository
 import nl.codeclan.timesheet.repository.LocationRepository
 import nl.codeclan.timesheet.repository.findByMonth
+import nl.codeclan.timesheet.service.EmployeeService
 import nl.codeclan.timesheet.service.TimesheetService
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.web.bind.annotation.*
@@ -17,6 +19,7 @@ import java.util.*
 @RequestMapping("/timesheet")
 class TimesheetController(
     private val timesheetService: TimesheetService,
+    private val employeeService: EmployeeService,
     private val dayRepository: DayRepository,
     private val locationRepository: LocationRepository,
 ) {
@@ -28,17 +31,19 @@ class TimesheetController(
 
     @PostMapping
     fun timesheet(@RequestBody timesheet: Timesheet) {
-        val existing = dayRepository.findByMonth(timesheet.month)
+        val employee = employeeService.getEmployee()
+        val existing = dayRepository.findByMonth(employee, timesheet.month)
         dayRepository.saveAll(timesheet.days.mapIndexed { idx, day ->
-            day(existing, timesheet.getDay(idx), day.type, day.location)
+            day(existing, timesheet.getDay(idx), day.type, day.location, employee)
         })
     }
 
-    private fun day(existing: Map<LocalDate, TimesheetDay>, date: LocalDate, type: DayType, location: Long?): TimesheetDay {
+    private fun day(existing: Map<LocalDate, TimesheetDay>, date: LocalDate, type: DayType, location: Long?, employee: Employee): TimesheetDay {
         val day = existing[date] ?: TimesheetDay()
         day.type = type
         day.date = date
         day.location = location?.let { locationRepository.findById(it).get() }
+        day.employee = employee
         return day
     }
 

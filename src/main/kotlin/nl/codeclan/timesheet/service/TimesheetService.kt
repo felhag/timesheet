@@ -23,6 +23,7 @@ private val HOLIDAY_MANAGER = HolidayManager.getInstance(ManagerParameters.creat
 class TimesheetService(
     val dayRepository: DayRepository,
     val locRepository: LocationRepository,
+    val employeeService: EmployeeService,
 ) {
     fun generate(month: YearMonth): Timesheet {
         val types = determineTypes(month)
@@ -30,8 +31,9 @@ class TimesheetService(
     }
 
     private fun determineTypes(month: YearMonth): ArrayList<Day> {
-        val persisted = dayRepository.findByMonth(month)
-        val locations = locRepository.findAll().flatMap { d -> d.defaultDays.map { it to d } }.toMap()
+        val employee = employeeService.getEmployee()
+        val persisted = dayRepository.findByMonth(employee, month)
+        val locations = locRepository.findAllByEmployeeEmail(employee.email).flatMap { d -> d.defaultDays.map { it to d } }.toMap()
         var from = month.atDay(1)
         val until = month.atEndOfMonth()
         val days = ArrayList<Day>()

@@ -13,6 +13,9 @@ class TimesheetDay(
     @Column(nullable = false, columnDefinition = "DATE")
     var date: LocalDate? = null,
 
+    @ManyToOne
+    var employee: Employee? = null,
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     var type: DayType? = null,

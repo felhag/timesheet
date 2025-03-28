@@ -1,6 +1,7 @@
 package nl.codeclan.timesheet.controller
 
 import nl.codeclan.timesheet.model.UserDto
+import nl.codeclan.timesheet.service.EmployeeService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
 @RestController
-class AuthController(@Value("\${codeclan.base-url}") private val url: String) {
+class AuthController(
+    private val employeeService: EmployeeService,
+    @Value("\${codeclan.base-url}") private val url: String) {
 
     @GetMapping("/user")
     fun user(@AuthenticationPrincipal oAuth2User: OAuth2User?): ResponseEntity<UserDto> {
@@ -21,7 +24,10 @@ class AuthController(@Value("\${codeclan.base-url}") private val url: String) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         } else {
             val attrs = oAuth2User.attributes
-            val user = UserDto(attrs["name"].toString(), attrs["email"].toString())
+            val name = attrs["name"].toString()
+            val email = attrs["email"].toString()
+            val create = employeeService.findOrCreate(name, email)
+            val user = UserDto(name, email)
             return ResponseEntity.ok(user)
         }
     }

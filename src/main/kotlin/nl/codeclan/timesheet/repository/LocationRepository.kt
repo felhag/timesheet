@@ -5,4 +5,6 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface LocationRepository: CrudRepository<Location, Long>
+interface LocationRepository: CrudRepository<Location, Long> {
+    fun findAllByEmployeeEmail(email: String): List<Location>
+}

@@ -17,7 +17,7 @@ class SecurityConfig(private val clientRegistrationRepository: ClientRegistratio
     @Bean
     fun oauth2SecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http.csrf { it.disable() }
-            .authorizeHttpRequests { it.anyRequest().authenticated() }
+            .authorizeHttpRequests { it.requestMatchers("/actuator/**").permitAll().anyRequest().authenticated() }
             .oauth2Login {
                 it.authorizationEndpoint { endpoint ->
                     endpoint.authorizationRequestResolver(

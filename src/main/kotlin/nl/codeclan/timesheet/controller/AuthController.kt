@@ -27,7 +27,7 @@ class AuthController(
             val name = attrs["name"].toString()
             val email = attrs["email"].toString()
             val create = employeeService.findOrCreate(name, email)
-            val user = UserDto(name, email)
+            val user = UserDto(name, email, create.home != null)
             return ResponseEntity.ok(user)
         }
     }

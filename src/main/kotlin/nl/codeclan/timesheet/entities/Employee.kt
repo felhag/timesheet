@@ -16,4 +16,7 @@ class Employee(
     @field:NotBlank
     @Column(nullable = false)
     var email: String = "",
+
+    @ManyToOne(optional = true)
+    var home: Location? = null
 )

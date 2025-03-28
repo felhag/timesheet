@@ -1,6 +1,7 @@
 package nl.codeclan.timesheet.entities
 
 import ValidLocation
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 import java.time.DayOfWeek
@@ -17,7 +18,8 @@ class Location(
     var name: String = "",
 
     @ManyToOne
-    var employee: Employee,
+    @JsonIgnore
+    var employee: Employee? = null,
 
     @Column(nullable = false)
     var lat: Double = 0.0,

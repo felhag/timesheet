@@ -82,7 +82,7 @@ class ReiskostenExcelWriter(val locationRepository: LocationRepository) : Abstra
 
         val kmCell = row.createCell(2, CellType.NUMERIC)
         kmCell.cellStyle = formatStyle(workbook, "# k\\m")
-        kmCell.setCellValue(location.distance!!.toDouble())
+        kmCell.setCellValue(location.distance!!.toDouble() * 2)
 
         val costsCell = row.createCell(3)
         costsCell.cellFormula = "C${rowIdx}*0.23"

@@ -1,6 +1,6 @@
 package nl.codeclan.timesheet.service.excel
 
-import nl.codeclan.timesheet.model.Timesheet
+import nl.codeclan.timesheet.model.TimesheetDto
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Workbook
@@ -10,10 +10,10 @@ import java.io.File
 import java.io.FileOutputStream
 
 abstract class AbstractExcelWriter {
-    abstract fun write(workbook: Workbook, sheet: Sheet, timesheet: Timesheet)
+    abstract fun write(workbook: Workbook, sheet: Sheet, timesheet: TimesheetDto)
     abstract fun name(): String
 
-    fun write(timesheet: Timesheet): File {
+    fun write(timesheet: TimesheetDto): File {
         val workbook = XSSFWorkbook()
         val sheet = workbook.createSheet(name())
 

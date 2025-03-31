@@ -1,6 +1,6 @@
 package nl.codeclan.timesheet.controller
 
-import nl.codeclan.timesheet.model.Timesheet
+import nl.codeclan.timesheet.model.TimesheetDto
 import nl.codeclan.timesheet.service.excel.AbstractExcelWriter
 import nl.codeclan.timesheet.service.excel.ReiskostenExcelWriter
 import nl.codeclan.timesheet.service.excel.TimesheetExcelWriter
@@ -21,16 +21,16 @@ class ExcelController(
     private val timesheetWriter: TimesheetExcelWriter,
 ) {
     @PostMapping("/reiskosten")
-    fun reiskosten(@RequestBody timesheet: Timesheet): ResponseEntity<InputStreamResource> {
+    fun reiskosten(@RequestBody timesheet: TimesheetDto): ResponseEntity<InputStreamResource> {
         return writeExcel(reiskostenWriter, timesheet)
     }
 
     @PostMapping("/timesheet")
-    fun timesheet(@RequestBody timesheet: Timesheet): ResponseEntity<InputStreamResource> {
+    fun timesheet(@RequestBody timesheet: TimesheetDto): ResponseEntity<InputStreamResource> {
         return writeExcel(timesheetWriter, timesheet)
     }
 
-    private fun writeExcel(writer: AbstractExcelWriter, timesheet: Timesheet): ResponseEntity<InputStreamResource> {
+    private fun writeExcel(writer: AbstractExcelWriter, timesheet: TimesheetDto): ResponseEntity<InputStreamResource> {
         val file = writer.write(timesheet)
         val resource = InputStreamResource(FileInputStream(file))
 

@@ -2,7 +2,7 @@ package nl.codeclan.timesheet.service.excel
 
 import nl.codeclan.timesheet.model.Day
 import nl.codeclan.timesheet.model.DayType
-import nl.codeclan.timesheet.model.Timesheet
+import nl.codeclan.timesheet.model.TimesheetDto
 import org.apache.poi.ss.usermodel.*
 import org.springframework.stereotype.Service
 
@@ -12,7 +12,7 @@ class TimesheetExcelWriter: AbstractExcelWriter() {
 
     override fun name(): String = "Timesheet"
 
-    override fun write(workbook: Workbook, sheet: Sheet, timesheet: Timesheet) {
+    override fun write(workbook: Workbook, sheet: Sheet, timesheet: TimesheetDto) {
         sheet.setColumnWidth(0, 6000)
         timesheet.forEachColumn { i -> sheet.setColumnWidth(i, 1200) }
 
@@ -28,7 +28,7 @@ class TimesheetExcelWriter: AbstractExcelWriter() {
         totalRow(workbook, sheet, timesheet)
     }
 
-    private fun dateRow(workbook: Workbook,  sheet: Sheet, timesheet: Timesheet) {
+    private fun dateRow(workbook: Workbook,  sheet: Sheet, timesheet: TimesheetDto) {
         val dates = sheet.createRow(2)
         timesheet.days.forEachIndexed { i, day ->
             val type = day.type
@@ -38,7 +38,7 @@ class TimesheetExcelWriter: AbstractExcelWriter() {
         }
     }
 
-    private fun createRow(workbook: Workbook, sheet: Sheet, timesheet: Timesheet, index: Int, label: String, type: DayType) {
+    private fun createRow(workbook: Workbook, sheet: Sheet, timesheet: TimesheetDto, index: Int, label: String, type: DayType) {
         val row = sheet.createRow(index)
         row.createCell(0).setCellValue(label)
         addIfType(workbook, row, timesheet.days, type, index)
@@ -65,7 +65,7 @@ class TimesheetExcelWriter: AbstractExcelWriter() {
         total.cellStyle = style(workbook, IndexedColors.WHITE)
     }
 
-    private fun totalRow(workbook: Workbook, sheet: Sheet, timesheet: Timesheet) {
+    private fun totalRow(workbook: Workbook, sheet: Sheet, timesheet: TimesheetDto) {
         val total: Row = sheet.createRow(8)
         val totalLabel = total.createCell(0)
         totalLabel.setCellValue("Totaal aantal uren")

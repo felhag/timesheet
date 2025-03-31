@@ -2,7 +2,7 @@ package nl.codeclan.timesheet.service.excel
 
 import nl.codeclan.timesheet.entities.Location
 import nl.codeclan.timesheet.model.Day
-import nl.codeclan.timesheet.model.Timesheet
+import nl.codeclan.timesheet.model.TimesheetDto
 import nl.codeclan.timesheet.repository.LocationRepository
 import org.apache.poi.ss.usermodel.*
 import org.springframework.stereotype.Service
@@ -14,7 +14,7 @@ class ReiskostenExcelWriter(val locationRepository: LocationRepository) : Abstra
 
     override fun name(): String = "Reiskosten"
 
-    override fun write(workbook: Workbook, sheet: Sheet, timesheet: Timesheet) {
+    override fun write(workbook: Workbook, sheet: Sheet, timesheet: TimesheetDto) {
         val locations = locationRepository.findAll().associateBy { it.id!! }
         IntRange(0, 3).forEach{ i -> sheet.setColumnWidth(i, 4000) }
 

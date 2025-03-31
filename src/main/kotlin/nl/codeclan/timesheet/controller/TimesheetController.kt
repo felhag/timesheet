@@ -1,12 +1,10 @@
 package nl.codeclan.timesheet.controller
 
-import nl.codeclan.timesheet.entities.Employee
+import nl.codeclan.timesheet.entities.Timesheet
 import nl.codeclan.timesheet.entities.TimesheetDay
-import nl.codeclan.timesheet.model.DayType
-import nl.codeclan.timesheet.model.Timesheet
-import nl.codeclan.timesheet.repository.DayRepository
+import nl.codeclan.timesheet.model.TimesheetDto
 import nl.codeclan.timesheet.repository.LocationRepository
-import nl.codeclan.timesheet.repository.findByMonth
+import nl.codeclan.timesheet.repository.TimesheetRepository
 import nl.codeclan.timesheet.service.EmployeeService
 import nl.codeclan.timesheet.service.TimesheetService
 import org.springframework.format.annotation.DateTimeFormat
@@ -20,31 +18,30 @@ import java.util.*
 class TimesheetController(
     private val timesheetService: TimesheetService,
     private val employeeService: EmployeeService,
-    private val dayRepository: DayRepository,
+    private val timesheetRepository: TimesheetRepository,
     private val locationRepository: LocationRepository,
 ) {
     @GetMapping("", "/{monthYear}")
-    fun generate(@PathVariable(required = false) @DateTimeFormat(pattern = "M-yyyy") monthYear: Optional<YearMonth>): Timesheet {
+    fun generate(@PathVariable(required = false) @DateTimeFormat(pattern = "M-yyyy") monthYear: Optional<YearMonth>): TimesheetDto {
         val month = monthYear.orElseGet(this::determineMonth)
         return month.let(timesheetService::generate)
     }
 
     @PostMapping
-    fun timesheet(@RequestBody timesheet: Timesheet) {
+    fun timesheet(@RequestBody dto: TimesheetDto) {
         val employee = employeeService.getEmployee()
-        val existing = dayRepository.findByMonth(employee, timesheet.month)
-        dayRepository.saveAll(timesheet.days.mapIndexed { idx, day ->
-            day(existing, timesheet.getDay(idx), day.type, day.location, employee)
-        })
-    }
-
-    private fun day(existing: Map<LocalDate, TimesheetDay>, date: LocalDate, type: DayType, location: Long?, employee: Employee): TimesheetDay {
-        val day = existing[date] ?: TimesheetDay()
-        day.type = type
-        day.date = date
-        day.location = location?.let { locationRepository.findById(it).get() }
-        day.employee = employee
-        return day
+        val timesheet = timesheetRepository.findByEmployeeAndYearMonth(employee, dto.month)
+            ?: Timesheet(
+                yearMonth = dto.month,
+                employee = employee,
+                days = List(dto.month.lengthOfMonth()) { TimesheetDay(date = dto.month.atDay(it + 1)) }
+            )
+        timesheet.days.forEachIndexed { idx, day ->
+            val d = dto.days[idx]
+            day.type = d.type
+            day.location = d.location?.let { locationRepository.findById(it).get() }
+        }
+        timesheetRepository.save(timesheet)
     }
 
     private fun determineMonth(): YearMonth {

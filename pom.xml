@@ -76,12 +76,12 @@
 		<dependency>
 			<groupId>de.focus-shift</groupId>
 			<artifactId>jollyday-core</artifactId>
-			<version>0.29.0</version>
+			<version>1.5.2</version>
 		</dependency>
 		<dependency>
 			<groupId>de.focus-shift</groupId>
 			<artifactId>jollyday-jaxb</artifactId>
-			<version>0.29.0</version>
+			<version>1.5.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>

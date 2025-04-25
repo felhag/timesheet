@@ -1,6 +1,7 @@
 package nl.codeclan.timesheet.service
 
 import de.focus_shift.jollyday.core.HolidayManager
+import de.focus_shift.jollyday.core.HolidayType
 import de.focus_shift.jollyday.core.ManagerParameters
 import nl.codeclan.timesheet.model.Day
 import nl.codeclan.timesheet.model.DayType
@@ -50,7 +51,7 @@ class TimesheetService(
     private fun determineType(day: LocalDate, vacation: Set<LocalDate>): DayType {
         return if (day.dayOfWeek == DayOfWeek.SATURDAY || day.dayOfWeek == DayOfWeek.SUNDAY) {
             DayType.WEEKEND
-        } else if (HOLIDAY_MANAGER.isHoliday(day)) {
+        } else if (HOLIDAY_MANAGER.isHoliday(day, HolidayType.PUBLIC_HOLIDAY)) {
             DayType.HOLIDAY
         } else if (vacation.contains(day)) {
             DayType.LEAVE
